@@ -79,7 +79,7 @@ load_dotenv()
 
 API_KEY = os.getenv("YOUTUBE_API_KEY")
 
-GENRE_KEYWORD = "Ambient Dub"
+GENRE_KEYWORD = "Forest Psytrance"
 
 NUM_CANDIDATE_VIDEOS = 25
 

@@ -40,7 +40,7 @@ load_dotenv()
 
 OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY")
 OMNIROUTE_BASE_URL = "http://localhost:20128/v1"
-OMNIROUTE_MODEL = "baifree"
+OMNIROUTE_MODEL = "thar/deepseek-v4.1-flash:free"
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 
 OUTPUT_DIR = "output"

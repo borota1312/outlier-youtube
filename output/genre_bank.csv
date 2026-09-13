@@ -1,22 +1,22 @@
 genre,analysis_status,channel_count,avg_views,viability_index,longform_ratio_pct,top3_share_pct,engagement_rate_pct,avg_view_velocity,competition_status,monetization_score,recommendation,analyzed_at
-HexD,analyzed,8,98,0.48,0.0,72.8,2.43,15,Blue Ocean,39.0,Not Recommended,2026-08-30
-Ambient Dub,analyzed,14,596,0.06,89.8,93.7,3.11,36,Moderate,36.3,Not Recommended,2026-08-30
-Bruk,analyzed,12,506,0.96,0.0,81.2,1.16,17,Blue Ocean,37.3,Not Recommended,2026-08-30
-Balochi Benjo-Acid,no_data,,,,,,,,,,,2026-08-30
-Maghrebi Gnawa-Bass,no_data,,,,,,,,,,,2026-08-30
-Dungeon Rap,analyzed,1,24,0.03,0.0,100.0,4.17,2,Monopolized,15.3,Not Recommended,2026-08-30
-Cumbia Rebajada,analyzed,1,4043,0.51,100.0,100.0,0.94,143,Monopolized,29.1,Not Recommended,2026-08-30
-Ethio-Dub,analyzed,1,1103,0.51,0.0,100.0,7.16,44,Monopolized,20.2,Not Recommended,2026-08-30
-Egg Punk,analyzed,1,44,0.03,0.0,100.0,2.27,14,Monopolized,8.9,Not Recommended,2026-08-30
-Hood Ambient,analyzed,1,88,17.6,0.0,100.0,1.14,3,Monopolized,29.3,Not Recommended,2026-08-30
-Pastoral Drone-Folk,no_data,,,,,,,,,,,2026-08-30
-Sigilkore,analyzed,1,130,1.06,0.0,100.0,3.85,3,Monopolized,25.0,Not Recommended,2026-08-30
-Amapiano Noir,analyzed,1,55,0.48,100.0,100.0,1.82,1,Monopolized,31.6,Not Recommended,2026-08-30
-Mahraganat-Core,no_data,,,,,,,,,,,2026-08-30
-Cosmic Highlife,no_data,,,,,,,,,,,2026-08-30
-Gothic Cumbia,no_data,,,,,,,,,,,2026-08-30
-Griot-Step,no_data,,,,,,,,,,,2026-08-30
-Sertanejo Psicodélico,no_data,,,,,,,,,,,2026-08-30
+HexD,analyzed,6,79,0.65,0.0,89.2,2.04,2,Moderate,26.4,Not Recommended,2026-09-11
+Ambient Dub,analyzed,17,1057,0.13,84.0,91.7,2.73,45,Moderate,37.2,Not Recommended,2026-09-11
+Bruk,analyzed,8,787,1.36,0.0,91.5,1.22,19,Moderate,27.3,Not Recommended,2026-09-11
+Balochi Benjo-Acid,no_data,,,,,,,,,,,2026-09-11
+Maghrebi Gnawa-Bass,no_data,,,,,,,,,,,2026-09-11
+Dungeon Rap,analyzed,1,33,0.04,0.0,100.0,3.03,1,Monopolized,11.8,Not Recommended,2026-09-11
+Cumbia Rebajada,analyzed,2,3952,0.74,100.0,100.0,0.92,141,Monopolized,31.3,Not Recommended,2026-09-11
+Ethio-Dub,analyzed,2,734,0.61,0.0,100.0,6.13,19,Monopolized,21.2,Not Recommended,2026-09-11
+Egg Punk,analyzed,1,72,0.04,0.0,100.0,1.39,4,Monopolized,5.6,Not Recommended,2026-09-11
+Hood Ambient,analyzed,1,89,9.89,0.0,100.0,1.12,2,Monopolized,29.2,Not Recommended,2026-09-11
+Pastoral Drone-Folk,no_data,,,,,,,,,,,2026-09-11
+Sigilkore,analyzed,2,115,0.0,50.0,100.0,2.61,2,Monopolized,19.8,Not Recommended,2026-09-11
+Amapiano Noir,analyzed,1,55,0.47,100.0,100.0,1.82,1,Monopolized,31.5,Not Recommended,2026-09-11
+Mahraganat-Core,no_data,,,,,,,,,,,2026-09-11
+Cosmic Highlife,no_data,,,,,,,,,,,2026-09-11
+Gothic Cumbia,no_data,,,,,,,,,,,2026-09-11
+Griot-Step,no_data,,,,,,,,,,,2026-09-11
+Sertanejo Psicodélico,no_data,,,,,,,,,,,2026-09-11
 Throat-Singing Drift,no_data,,,,,,,,,,,2026-09-11
 Gulf Futurism / Khaleeji Bass,no_data,,,,,,,,,,,2026-09-11
 Forrónoise,no_data,,,,,,,,,,,2026-09-11
@@ -34,10 +34,61 @@ Afro-Bolivian Saya Bass,no_data,,,,,,,,,,,2026-09-11
 Taarab Phonk,no_data,,,,,,,,,,,2026-09-11
 Fuji Acid Rap,no_data,,,,,,,,,,,2026-09-11
 Spiritual Funk Drill,no_data,,,,,,,,,,,2026-09-11
-Haunt Club,analyzed,11,208,0.22,9.1,75.3,3.18,10,Blue Ocean,41.0,High Risk,2026-09-11
+Haunt Club,analyzed,12,1936,2.21,8.3,96.6,0.75,445,Monopolized,29.9,Not Recommended,2026-09-11
 Chicha Drill,no_data,,,,,,,,,,,2026-09-11
-Shamanic,analyzed,44,231039,5.99,32.0,96.0,1.48,4809,Monopolized,54.2,High Risk,2026-09-11
-Shamanic Music,analyzed,45,339501,6.53,34.0,83.5,1.29,9232,Blue Ocean,71.8,Viable,2026-09-11
-Celtic,analyzed,34,73106,4.24,42.0,71.2,1.47,1792,Blue Ocean,69.3,Viable,2026-09-11
-Break-Beat,analyzed,37,127460,1.6,64.0,55.9,0.84,3942,Blue Ocean,68.8,Viable,2026-09-11
-Desert Blues Dub,analyzed,7,5307,2.05,77.8,98.2,2.79,205,Monopolized,47.1,High Risk,2026-09-11
+Shamanic,analyzed,45,247768,6.34,28.0,92.2,1.46,6183,Moderate,59.1,High Risk,2026-09-11
+Shamanic Music,analyzed,45,340907,6.45,36.0,83.5,1.29,9263,Blue Ocean,72.2,Viable,2026-09-11
+Celtic,analyzed,35,73978,4.32,42.0,70.6,1.47,1917,Blue Ocean,69.7,Viable,2026-09-11
+Break-Beat,analyzed,37,88868,1.14,70.0,39.2,0.81,3150,Blue Ocean,62.9,Viable,2026-09-11
+Desert Blues Dub,analyzed,7,5308,2.05,77.8,98.2,2.79,202,Monopolized,47.1,High Risk,2026-09-11
+Celtic Music,analyzed,39,109425,1.7,32.0,53.1,1.5,3044,Blue Ocean,63.2,Viable,2026-09-11
+Break Beat,analyzed,38,90152,1.16,64.0,38.6,0.91,3307,Blue Ocean,62.7,Viable,2026-09-11
+Singeli,analyzed,12,28844,4.0,16.7,97.2,0.6,559,Monopolized,33.4,Not Recommended,2026-09-11
+Dangdut Gabber,no_data,,,,,,,,,,,2026-09-11
+Comfy Synth,no_data,,,,,,,,,,,2026-09-11
+Raggacore,analyzed,2,158,0.18,0.0,100.0,4.75,3,Monopolized,16.8,Not Recommended,2026-09-11
+Philly Club,analyzed,2,40,1.43,0.0,100.0,1.23,1,Monopolized,18.9,Not Recommended,2026-09-11
+Balani Show,no_data,,,,,,,,,,,2026-09-11
+Tecnobrega,analyzed,4,1429,0.6,25.0,98.3,1.38,33,Monopolized,16.3,Not Recommended,2026-09-11
+Scam Rap,analyzed,10,55,0.02,0.0,66.5,5.79,2,Blue Ocean,40.2,High Risk,2026-09-11
+Modern Funk,analyzed,26,8690,0.18,16.0,98.0,1.87,214,Monopolized,12.7,Not Recommended,2026-09-11
+Harsh Noise Wall,analyzed,4,86,0.61,40.0,92.1,4.17,5,Moderate,37.3,Not Recommended,2026-09-11
+Guyanese Folk-Glitch,no_data,,,,,,,,,,,2026-09-11
+SÃ¡mi Noise-Joik,no_data,,,,,,,,,,,2026-09-11
+Ethiopian Cassette-Noise,no_data,,,,,,,,,,,2026-09-11
+Fog-Drone,analyzed,6,9182,4.4,16.7,99.6,0.07,366,Monopolized,29.7,Not Recommended,2026-09-11
+Trenchcore,no_data,,,,,,,,,,,2026-09-11
+Perreo-Tumbao,no_data,,,,,,,,,,,2026-09-11
+Juke-Murda,no_data,,,,,,,,,,,2026-09-11
+Sardinian Tenore-Bass,no_data,,,,,,,,,,,2026-09-11
+Kuduro-Noise,analyzed,1,255,2.97,0.0,100.0,1.17,6,Monopolized,29.4,Not Recommended,2026-09-11
+Champeta,analyzed,9,2690,0.03,0.0,99.3,1.48,127,Monopolized,6.2,Not Recommended,2026-09-11
+Tallava,analyzed,23,10155,4.74,4.0,57.8,1.05,422,Blue Ocean,56.0,High Risk,2026-09-11
+Shangaan Electro,no_data,,,,,,,,,,,2026-09-11
+Sudanese Funk Revival,no_data,,,,,,,,,,,2026-09-11
+Bruxaria Funk,analyzed,5,1446,3.27,0.0,99.2,2.04,40,Monopolized,32.8,Not Recommended,2026-09-11
+Wave / Hardwave,analyzed,2,586,1.03,75.0,100.0,2.56,11,Monopolized,34.9,Not Recommended,2026-09-11
+Suomisaundi,no_data,,,,,,,,,,,2026-09-11
+Forest Psytrance,analyzed,22,2417,1.57,58.3,83.4,2.13,109,Blue Ocean,55.9,High Risk,2026-09-11
+Skullstep,no_data,,,,,,,,,,,2026-09-11
+Winter Synth,no_data,,,,,,,,,,,2026-09-11
+Gamelan Noise,analyzed,4,56927,0.55,50.0,99.6,1.47,1603,Monopolized,25.8,Not Recommended,2026-09-12
+Ritual Ambient,analyzed,37,1307,0.26,40.0,77.8,3.59,63,Blue Ocean,49.3,High Risk,2026-09-12
+Makina,analyzed,5,17407,1.28,0.0,98.5,0.6,351,Monopolized,16.1,Not Recommended,2026-09-12
+Mallsoft,analyzed,1,31,0.07,0.0,100.0,0.0,2,Monopolized,0.7,Not Recommended,2026-09-12
+Lolicore,no_data,,,,,,,,,,,2026-09-12
+Drumfunk,no_data,,,,,,,,,,,2026-09-12
+Dabke Bass,analyzed,3,56,0.15,9.1,100.0,3.06,1,Monopolized,14.8,Not Recommended,2026-09-12
+Ainu Tonkori Dub,no_data,,,,,,,,,,,2026-09-12
+Jerk,analyzed,17,20821,1.93,0.0,98.9,0.1,2223,Monopolized,26.3,Not Recommended,2026-09-12
+Skweee,analyzed,1,61,0.6,0.0,100.0,6.56,1,Monopolized,21.0,Not Recommended,2026-09-12
+Zamrock,analyzed,1,291,0.48,0.0,100.0,1.03,10,Monopolized,8.7,Not Recommended,2026-09-12
+Molam,analyzed,13,6734,0.24,8.0,89.7,0.75,1129,Moderate,21.7,Not Recommended,2026-09-12
+Raboday,analyzed,2,750,0.33,0.0,100.0,1.13,14,Monopolized,7.6,Not Recommended,2026-09-12
+Tarraxinha,analyzed,9,9992,29.48,83.3,98.9,0.97,317,Monopolized,46.2,High Risk,2026-09-12
+Extratone,no_data,,,,,,,,,,,2026-09-12
+Dreampunk,analyzed,6,171,0.27,30.8,84.8,5.21,16,Blue Ocean,42.2,High Risk,2026-09-12
+Plugg,analyzed,22,162556,7.19,0.0,99.9,1.77,2888,Monopolized,40.3,High Risk,2026-09-12
+Krushclub,analyzed,1,1787,7.57,0.0,100.0,2.13,89,Monopolized,33.3,Not Recommended,2026-09-12
+Sevdalinka,analyzed,8,1821,0.72,0.0,96.5,1.24,187,Monopolized,14.5,Not Recommended,2026-09-12
+Gengetone,analyzed,4,225,0.02,0.0,94.0,1.22,14,Moderate,10.4,Not Recommended,2026-09-12

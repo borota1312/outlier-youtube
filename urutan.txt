@@ -1,7 +1,7 @@
 stable_channel_finder.py
 generate_style.py
 generate_prompts.py
-generate_images_wombo.py -> generate_images_free_diffusion.py
+generate_images_wombo.py -> generate_images.py
 generate_dna_music.py
 generate_prompts_music.py
 generate_musics.py

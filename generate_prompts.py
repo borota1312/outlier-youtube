@@ -59,7 +59,7 @@ import sys
 
 OUTPUT_DIR = "output"
 
-GENRE_FOLDER = "ambient_dub"
+GENRE_FOLDER = "desert_blues_dub"
 
 PROMPT_COUNT = 15
 
@@ -75,22 +75,21 @@ RANDOM_SEED = 42
 # ============================================================
 
 PROMPT_TEMPLATE_LANDSCAPE = (
+    "{pose}, viewed from {angle}, set in {background}. "
     "{style_block} "
-    "Show the subject in {pose}, viewed from {angle}, set in {background}. "
-    "Aspect ratio 4:3. "
+    "Aspect ratio 16:9. "
     "CRITICAL QUALITY: Ensure natural proportions for the subject type. "
     "Absolutely no text, no typography, no letters, no words, no written content "
     "visible anywhere in the image. Clean visual only. No watermark."
 )
 
 PROMPT_TEMPLATE_PORTRAIT = (
-    "{style_block} "
+    "{pose}, viewed from {angle}, set in {background}. "
     "Compose the entire image as if it were a horizontal landscape photograph, "
     "then rotate the whole scene 90 degrees clockwise to fill a vertical 9:16 canvas. "
     "The subject's body lies sideways across the frame, head toward bottom-left "
     "and shoulders extending toward top-right, as if a landscape photo were "
     "rotated onto its side — all elements rotated together as one unified scene. "
-    "Show the subject in {pose}, viewed from {angle}, set in {background}. "
     "Aspect ratio 9:16. "
     "CRITICAL QUALITY: Ensure natural proportions for the subject type. "
     "Absolutely no text, no typography, no letters, no words, no written content "
@@ -372,12 +371,8 @@ def build_prompts(style_block: str, variations: dict, count: int, seed=None):
             "background": combo["background"],
         }
 
-        prompt_landscape = sanitize_text(
-            PROMPT_TEMPLATE_LANDSCAPE.format(**fmt_args)
-        )
-        prompt_portrait = sanitize_text(
-            PROMPT_TEMPLATE_PORTRAIT.format(**fmt_args)
-        )
+        prompt_landscape = sanitize_text(PROMPT_TEMPLATE_LANDSCAPE.format(**fmt_args))
+        prompt_portrait = sanitize_text(PROMPT_TEMPLATE_PORTRAIT.format(**fmt_args))
 
         prompts.append(
             {

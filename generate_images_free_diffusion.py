@@ -40,8 +40,8 @@ import requests
 from PIL import Image
 
 OUTPUT_DIR = "output"
-GENRE_FOLDER = "ambient_dub"
-CHANNEL_FOLDER = "Moonleaf Audio"
+GENRE_FOLDER = "desert_blues_dub"
+CHANNEL_FOLDER = "Bayou Gator Dub"
 
 API_BASE_URL = "https://api.stablediffusion3.net"
 CANVAS_ID = "-1574096571"

@@ -58,9 +58,9 @@ load_dotenv()
 
 OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY")
 OMNIROUTE_BASE_URL = "http://localhost:20128/v1"
-OMNIROUTE_MODEL = "combo-analisis"
+OMNIROUTE_MODEL = "thar/mimo-v2.5:free"
 OUTPUT_DIR = "output"
-GENRE_FOLDER = "ambient_dub"
+GENRE_FOLDER = "desert_blues_dub"
 THUMBNAIL_FILENAME = "thumbnails_10.jpg"
 THUMBNAIL_FALLBACK_NAMES = [
     "thumbnails_10.jpg",

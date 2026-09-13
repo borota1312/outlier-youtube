@@ -2,8 +2,11 @@
 generate_images.py
 ===================
 Baca prompts.json dari SATU folder channel spesifik (output/[genre]/[channel]/),
-lalu kirim tiap prompt ke endpoint text-to-image OmniRoute lokal
-(POST /v1/images/generations, format OpenAI-compatible).
+lalu generate gambar via Cloudflare Workers AI (FLUX.2 klein 9B, text-to-image).
+
+Endpoint:
+    POST https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/run/{model}
+    Content-Type: multipart/form-data (field: prompt, width, height, steps)
 
 Hasil gambar disimpan di:
     output/[genre]/[channel]/image/[urutan_prompt].png
@@ -12,32 +15,40 @@ Contoh:
     output/heavy_metal_blues/Dark Men/image/1.png
     output/heavy_metal_blues/Dark Men/image/2.png
     ...
-    output/heavy_metal_blues/Dark Men/image/45.png
 
-PENTING soal model:
-    Model untuk ANALISIS STYLE (chat completion + vision, contoh:
-    antigravity/claude-opus-4-6-thinking) BEDA dengan model untuk
-    GENERATE GAMBAR (text-to-image). Endpoint /v1/images/generations
-    butuh model image-gen sungguhan, contoh dari dokumentasi OmniRoute:
-    openai/gpt-image-2, xai/grok-image, together/FLUX.1, nebius/FLUX,
-    fireworks/..., hyperbolic/..., dst — cek model apa yang aktif di
-    OmniRoute-mu sendiri (GET /v1/images/generations untuk daftar model).
+UKURAN / 16:9:
+    FLUX.2 klein menerima width & height bebas -> default 1280x720 (16:9).
+    Model ini membalas JSON {"result": {"image": "<base64 JPEG>"}} yang
+    didecode lalu disimpan sebagai .png. steps=4 sudah cukup untuk FLUX.2.
+
+GRATIS:
+    Free plan Cloudflare = 10.000 neurons/hari (reset 00:00 UTC).
+    Model partner (FLUX.2 klein) mungkin perlu accept Terms di dashboard.
+
+KREDENSIAL diambil dari file .env:
+    CLOUDFLARE_ACCOUNT_ID=...
+    CLOUDFLARE_API_TOKEN=...
 
 Cara pakai:
     python generate_images.py
     python generate_images.py --genre heavy_metal_blues --channel "Dark Men"
     python generate_images.py --overwrite
+    python generate_images.py --indices 1,3,5-8
+    python generate_images.py --size 1280x720 --steps 4
 """
 
 import argparse
 import base64
+import io
 import json
 import os
 import sys
 import time
+from typing import Optional
 
 import requests
 from dotenv import load_dotenv
+from PIL import Image
 
 load_dotenv()
 
@@ -45,20 +56,24 @@ load_dotenv()
 # KONFIGURASI — sesuaikan bagian ini
 # ============================================================
 
-OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY")
-OMNIROUTE_BASE_URL = "http://localhost:20128/v1"
+CF_ACCOUNT_ID = os.getenv("CLOUDFLARE_ACCOUNT_ID")
+CF_API_TOKEN = os.getenv("CLOUDFLARE_API_TOKEN")
 
-# GANTI ke model image-generation yang benar-benar tersedia di OmniRoute-mu.
-# Model chat/vision (mis. antigravity/claude-opus-4-6-thinking) TIDAK BISA
-# dipakai di sini — itu model teks, bukan model text-to-image.
-IMAGE_MODEL = "openrouter/openrouter/auto"
+CF_API_BASE = "https://api.cloudflare.com/client/v4/accounts"
+
+# Model text-to-image Cloudflare Workers AI.
+# FLUX.2 klein 9B: paling akurat memahami prompt (banjo, vest, fedora, malam).
+# Butuh request multipart/form-data, respons JSON base64 (JPEG) -> didecode.
+# Alternatif (kompatibel JSON biasa): @cf/bytedance/stable-diffusion-xl-lightning
+IMAGE_MODEL = "@cf/black-forest-labs/flux-2-klein-9b"
 
 OUTPUT_DIR = "output"  # folder induk tempat semua genre disimpan
 
-GENRE_FOLDER = "shamanic_musik"  # genre yang mau diproses
-CHANNEL_FOLDER = "Lyma Eve"  # nama channel spesifik yang mau diproses (harus persis sama dengan nama foldernya)
+GENRE_FOLDER = "desert_blues_dub"  # genre yang mau diproses
+CHANNEL_FOLDER = "Bayou Gator Dub"  # nama channel spesifik yang mau diproses (harus persis sama dengan nama foldernya)
 
-IMAGE_SIZE = "1792x1024"  # rasio landscape mendekati 16:9, sesuaikan dengan opsi yang didukung model image-mu
+IMAGE_SIZE = "1280x720"  # 16:9 landscape, FLUX.2 terima resolusi bebas
+STEPS = 4  # FLUX.2 klein cukup 4 steps (model distilasi)
 OVERWRITE_EXISTING = False  # True = timpa gambar yang sudah ada, False = skip
 
 REQUEST_TIMEOUT = 180
@@ -66,6 +81,37 @@ REQUEST_TIMEOUT = 180
 MAX_RETRIES = 4
 RETRY_BASE_DELAY = 5.0  # detik, naik 2x tiap percobaan (5s, 10s, 20s, 40s...)
 DELAY_BETWEEN_IMAGES = 2.0  # jeda antar-gambar biar tidak membanjiri server
+
+
+def cf_run_url(model: str) -> str:
+    return f"{CF_API_BASE}/{CF_ACCOUNT_ID}/ai/run/{model}"
+
+
+def parse_size(size: str) -> tuple:
+    """'1280x720' -> (1280, 720)"""
+    try:
+        w, h = size.lower().split("x")
+        width, height = int(w), int(h)
+        if width < 64 or height < 64:
+            raise ValueError
+        return width, height
+    except ValueError:
+        raise ValueError(f"Format --size salah: '{size}'. Pakai contoh: 1280x720")
+
+
+def parse_indices(indices_str: str) -> set:
+    """'1,3,5-8' -> {1,3,5,6,7,8}"""
+    selected = set()
+    for part in indices_str.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            lo, hi = part.split("-", 1)
+            selected.update(range(int(lo), int(hi) + 1))
+        else:
+            selected.add(int(part))
+    return selected
 
 
 def load_prompts(channel_dir: str) -> list:
@@ -80,30 +126,37 @@ def load_prompts(channel_dir: str) -> list:
     return data.get("prompts", [])
 
 
-def call_omniroute_image_generation(
-    base_url: str,
-    api_key: str,
+def call_cloudflare_image(
     model: str,
     prompt: str,
-    size: str,
+    width: int,
+    height: int,
+    steps: int,
     max_retries: int = MAX_RETRIES,
     base_delay: float = RETRY_BASE_DELAY,
 ) -> bytes:
-    """Kirim prompt ke /v1/images/generations, kembalikan bytes gambar (PNG/JPEG).
-    Menangani 2 kemungkinan format respons: b64_json atau url.
+    """Kirim prompt ke Cloudflare Workers AI /ai/run/{model},
+    kembalikan bytes gambar (PNG).
+
+    SDXL membalas PNG binary langsung; beberapa model lain (mis. FLUX)
+    membalas JSON {"result": {"image": "<base64>"}} — keduanya ditangani.
     Otomatis retry kalau server balas 429/500/502/503/504."""
 
     payload = {
-        "model": model,
         "prompt": prompt,
-        "size": size,
+        "steps": str(steps),
+        "width": str(width),
+        "height": str(height),
     }
 
-    headers = {"Content-Type": "application/json"}
-    if api_key:
-        headers["Authorization"] = f"Bearer {api_key}"
+    headers = {
+        "Authorization": f"Bearer {CF_API_TOKEN}",
+    }
 
-    url = base_url.rstrip("/") + "/images/generations"
+    url = cf_run_url(model)
+
+    # FLUX.2 klein mewajibkan multipart/form-data (bukan JSON/urlencoded).
+    files = {k: (None, v) for k, v in payload.items()}
 
     RETRYABLE_STATUS = {429, 500, 502, 503, 504}
     last_error = None
@@ -111,11 +164,11 @@ def call_omniroute_image_generation(
     for attempt in range(1, max_retries + 1):
         try:
             resp = requests.post(
-                url, headers=headers, json=payload, timeout=REQUEST_TIMEOUT
+                url, headers=headers, files=files, timeout=REQUEST_TIMEOUT
             )
 
             if resp.status_code in RETRYABLE_STATUS:
-                last_error = f"{resp.status_code} {resp.reason}"
+                last_error = f"HTTP {resp.status_code} {resp.reason}"
                 if attempt < max_retries:
                     delay = base_delay * (2 ** (attempt - 1))
                     print(
@@ -127,28 +180,28 @@ def call_omniroute_image_generation(
                     continue
                 resp.raise_for_status()
 
-            resp.raise_for_status()
-            data = resp.json()
+            if resp.status_code != 200:
+                raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:300]}")
 
-            items = data.get("data", [])
-            if not items:
-                raise RuntimeError(
-                    f"Respons tidak berisi data gambar: {json.dumps(data)[:500]}"
-                )
+            content_type = resp.headers.get("Content-Type", "")
 
-            item = items[0]
+            if "json" in content_type.lower():
+                data = resp.json()
+                if not data.get("success", False):
+                    errs = data.get("errors", [])
+                    msg = (
+                        "; ".join(e.get("message", str(e)) for e in errs)
+                        or json.dumps(data)[:300]
+                    )
+                    raise RuntimeError(f"Cloudflare error: {msg}")
+                img_b64 = (data.get("result") or {}).get("image")
+                if not img_b64:
+                    raise RuntimeError(
+                        f"JSON tanpa field result.image: {json.dumps(data)[:300]}"
+                    )
+                return base64.b64decode(img_b64)
 
-            if "b64_json" in item and item["b64_json"]:
-                return base64.b64decode(item["b64_json"])
-
-            if "url" in item and item["url"]:
-                img_resp = requests.get(item["url"], timeout=REQUEST_TIMEOUT)
-                img_resp.raise_for_status()
-                return img_resp.content
-
-            raise RuntimeError(
-                f"Format item data tidak dikenali: {json.dumps(item)[:500]}"
-            )
+            return resp.content
 
         except requests.exceptions.RequestException as e:
             last_error = str(e)
@@ -168,32 +221,54 @@ def call_omniroute_image_generation(
     )
 
 
+def ensure_png_bytes(image_bytes: bytes) -> bytes:
+    """FLUX.2 klein membalas JPEG, SDXL membalas PNG.
+    Normalisasi semua ke PNG sungguhan agar ekstensi .png konsisten."""
+    if image_bytes[:8] == b"\x89PNG\r\n\x1a\n":
+        return image_bytes
+
+    img = Image.open(io.BytesIO(image_bytes))
+    if img.mode not in ("RGB", "RGBA"):
+        img = img.convert("RGB")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
+
+
 def process_channel(
     output_dir: str,
     genre_folder: str,
     channel_folder: str,
-    base_url: str,
-    api_key: str,
     model: str,
-    size: str,
+    width: int,
+    height: int,
+    steps: int,
     overwrite: bool,
+    indices_str: Optional[str] = None,
 ):
     channel_dir = os.path.join(output_dir, genre_folder, channel_folder)
 
     if not os.path.isdir(channel_dir):
-        print(f"Folder channel tidak ditemukan: {channel_dir}")
+        print(f"❌ Folder channel tidak ditemukan: {channel_dir}")
         sys.exit(1)
 
     prompts = load_prompts(channel_dir)
+
     if not prompts:
-        print(f"Tidak ada prompt di prompts.json untuk channel '{channel_folder}'.")
+        print(f"❌ Tidak ada prompt di prompts.json untuk channel '{channel_folder}'.")
         return
+
+    selected_indices = None
+    if indices_str:
+        selected_indices = parse_indices(indices_str)
 
     image_dir = os.path.join(channel_dir, "image")
     os.makedirs(image_dir, exist_ok=True)
 
     print(
-        f"[{genre_folder}/{channel_folder}] {len(prompts)} prompt ditemukan. Model: {model}\n"
+        f"[{genre_folder}/{channel_folder}] "
+        f"{len(prompts)} prompt ditemukan. "
+        f"Model: {model}, Size: {width}x{height} (16:9), Steps: {steps}\n"
     )
 
     total_done, total_skipped, total_failed = 0, 0, 0
@@ -207,6 +282,9 @@ def process_channel(
             total_failed += 1
             continue
 
+        if selected_indices is not None and index not in selected_indices:
+            continue
+
         image_path = os.path.join(image_dir, f"{index}.png")
 
         if os.path.isfile(image_path) and not overwrite:
@@ -217,14 +295,24 @@ def process_channel(
             continue
 
         print(f"  - [{index}] Generate gambar...", end=" ", flush=True)
+
         try:
-            image_bytes = call_omniroute_image_generation(
-                base_url, api_key, model, prompt_text, size
+            image_bytes = call_cloudflare_image(
+                model=model,
+                prompt=prompt_text,
+                width=width,
+                height=height,
+                steps=steps,
             )
+
+            image_bytes = ensure_png_bytes(image_bytes)
+
             with open(image_path, "wb") as f:
                 f.write(image_bytes)
+
             print("OK")
             total_done += 1
+
         except Exception as e:
             print(f"GAGAL ({e})")
             total_failed += 1
@@ -240,52 +328,92 @@ def process_channel(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate gambar dari prompts.json untuk SATU channel spesifik via OmniRoute image generation. "
-        "Nilai default diambil dari variabel konfigurasi di atas file ini; "
-        "argumen di bawah ini opsional kalau mau override tanpa edit source."
+        description=(
+            "Generate gambar dari prompts.json untuk SATU channel spesifik "
+            "menggunakan Cloudflare Workers AI (SDXL, gratis). "
+            "Output PNG 16:9 (default 1280x720). "
+            "Kredensial dari .env: CLOUDFLARE_ACCOUNT_ID & CLOUDFLARE_API_TOKEN."
+        )
     )
+
     parser.add_argument("--output-dir", default=OUTPUT_DIR)
+
     parser.add_argument(
         "--genre", default=GENRE_FOLDER, required=False, help="Nama folder genre"
     )
+
     parser.add_argument(
         "--channel",
         default=CHANNEL_FOLDER,
         required=False,
         help="Nama folder channel (persis sesuai nama folder)",
     )
-    parser.add_argument("--base-url", default=OMNIROUTE_BASE_URL)
-    parser.add_argument("--api-key", default=OMNIROUTE_API_KEY)
-    parser.add_argument("--model", default=IMAGE_MODEL)
-    parser.add_argument("--size", default=IMAGE_SIZE)
-    parser.add_argument("--overwrite", action="store_true", default=OVERWRITE_EXISTING)
+
+    parser.add_argument(
+        "--model",
+        default=IMAGE_MODEL,
+        help=f"Model Workers AI (default: {IMAGE_MODEL})",
+    )
+
+    parser.add_argument(
+        "--size",
+        default=IMAGE_SIZE,
+        help="Ukuran output WxH (default: 1280x720 = 16:9)",
+    )
+
+    parser.add_argument(
+        "--steps",
+        type=int,
+        default=STEPS,
+        help=f"Jumlah sampling steps (default: {STEPS})",
+    )
+
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        default=OVERWRITE_EXISTING,
+        help="Timpa gambar yang sudah ada",
+    )
+
+    parser.add_argument(
+        "--indices",
+        default=None,
+        help="Hanya generate prompt tertentu, contoh: 1,3,5-8",
+    )
+
     args = parser.parse_args()
 
-    if not args.api_key:
+    if not CF_ACCOUNT_ID or not CF_API_TOKEN:
         print(
-            "OMNIROUTE_API_KEY belum di-set. Jalankan:\n"
-            '  export OMNIROUTE_API_KEY="api-key-kamu"\n'
-            "atau isi langsung di variabel OMNIROUTE_API_KEY pada file ini."
+            "CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN belum di-set. "
+            'Isi di file .env:\n  CLOUDFLARE_ACCOUNT_ID="..."\n  CLOUDFLARE_API_TOKEN="..."'
         )
         sys.exit(1)
 
-    if not args.genre or not args.channel:
-        print(
-            "GENRE_FOLDER dan CHANNEL_FOLDER wajib diisi (baik lewat variabel di atas file "
-            "maupun lewat --genre / --channel), supaya script ini cuma proses 1 channel spesifik."
-        )
+    try:
+        width, height = parse_size(args.size)
+    except ValueError as e:
+        print(f"❌ {e}")
         sys.exit(1)
 
-    process_channel(
-        output_dir=args.output_dir,
-        genre_folder=args.genre,
-        channel_folder=args.channel,
-        base_url=args.base_url,
-        api_key=args.api_key,
-        model=args.model,
-        size=args.size,
-        overwrite=args.overwrite,
-    )
+    try:
+        process_channel(
+            output_dir=args.output_dir,
+            genre_folder=args.genre,
+            channel_folder=args.channel,
+            model=args.model,
+            width=width,
+            height=height,
+            steps=args.steps,
+            overwrite=args.overwrite,
+            indices_str=args.indices,
+        )
+    except KeyboardInterrupt:
+        print("\n\n⚠️ Dibatalkan oleh user (Ctrl+C)")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
